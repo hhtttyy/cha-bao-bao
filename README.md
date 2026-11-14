@@ -47,7 +47,7 @@
 
 ## ⚠️ 已知问题（当前未解决，优先攻关）
 
-### 1. 无法获取经纬度（点「获取经纬度」长时间等待、无授权弹窗）
+### 1. 无法获取经纬度 —— ✅ 已修复（0.0.13 真机确认）
 
 - 现象：`my.getLocation` 调用后无成功回调，一直"获取中"，授权弹窗不出现。
 - 根因分析（按支付宝官方/社区资料）：
@@ -69,6 +69,52 @@
 
 - 体验版/线上版**无远程 console 日志**；真机日志需 IDE「真机调试」或 mPaaS 日志服务。
 - `miniapp/pages/report/report.js` 已内置 `dbg()` 诊断日志（记录拍照/录音/播放/定位每步真实返回），`toggleDebug()/copyDebug()` 可显示/复制（面板按钮待接入 axml）。
+
+---
+
+## 缺陷复盘：错误原因 → 解决思路（qwen-eval，均已真机验证）
+
+> 方法论：不盲改。先内置 `dbg()` 诊断日志拿到真机真实返回（路径/错误码），再对照支付宝平台特性定根因，最后最小修改。以下"错误版"指 0.0.9–0.0.11，"修复版"指 0.0.12–0.0.13。
+
+### A. 录音播放「文件已失效」
+
+**错误版代码（0.0.10）**：把录音复制到 `USER_DATA_PATH` 再播放：
+```js
+const dest = my.env.USER_DATA_PATH + "/media_xxx.aac";   // usr:// 协议
+fs.copyFile({ srcPath: tmp, destPath: dest, success: () => play(dest) });
+```
+**错误原因**：`<image>` 能读 `usr://`（所以照片正常），但 `innerAudioContext` 在该基础库**读不了 `usr://` 音频** → `onError`「文件已失效」。"持久化"反而把可播路径换成了不可播路径。另：单一播放器无降级、play 早于 canplay、iOS 静音拨片静音，都是叠加因素。
+
+**解决思路（0.0.12–0.0.13）**：
+```js
+// 持久化改用 my.saveFile，返回 https://resource/… （image 与原生 audio 均可读）
+my.saveFile({ apFilePath: tmp, success: r => play(r.apFilePath) });
+// 播放：多候选路径 × 原生/默认双播放器降级；obeyMuteSwitch=false；onCanplay 后再 play
+```
+并移除对 `https://resource/` 调 `getFileInfo` 的无效诊断（它必报"参数无效"，纯误报）。
+
+### B. 经纬度一直「获取中」
+
+**错误版代码**：拍照后自动定位 + 对字符串坐标调 `toFixed`：
+```js
+takePhoto(){ ...; this.locate(); }              // 自动定位，与手动按钮抢授权弹窗
+my.getLocation({ type: 1, success: res => {
+  locationText: "北纬 " + res.latitude.toFixed(4)  // res.latitude 是字符串 → TypeError
+}});                                            // 抛错后 setData 不执行 → UI 永停"获取中"
+```
+**错误原因**：真机日志 `loc.ok` 证明接口**成功**，但返回字符串坐标，`.toFixed` 抛 TypeError 中断 `setData`；叠加 `type:1` 逆地理编码慢、6s 超时过短、自动/手动定位冲突。
+
+**解决思路（0.0.13）**：
+```js
+// 取消自动定位，仅手动按钮触发；type:0 只取经纬度
+my.getLocation({ type: 0, success: res => {
+  const lat = Number(res.latitude), lng = Number(res.longitude);  // 先转数值
+  locationText: "北纬 " + lat.toFixed(4) + "，东经 " + lng.toFixed(4)
+}});
+// 超时放宽 10s；getSetting 区分"拒绝授权/失败"；locErr 暴露真实错误；定位不阻塞提交
+```
+
+**教训**：① 平台 API 返回值类型不可假设（坐标可能是字符串）；② 文件路径协议决定可读性（`usr://` vs `resource`），image 与 audio 能力不同；③ 真机无远程 console 时，内置诊断日志是定位根因的唯一可靠手段。
 
 ---
 
