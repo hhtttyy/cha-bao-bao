@@ -92,18 +92,20 @@ Page({
       return;
     }
     this.setData({ locationFail: false, locState: "locating" });
-    // 兜底：6 秒内没拿到定位就标记失败，不阻塞提交
+    // 兜底：10 秒内没拿到定位就标记失败，不阻塞提交（首次GPS可能较慢）
     this._locTimer = setTimeout(() => {
       if (!this.data.location) this.setData({ locationFail: true, locState: "fail" });
-    }, 6000);
+    }, 10000);
     my.getLocation({
       type: 0, // 只要经纬度，不做逆地理编码，返回更快
       success: res => {
         if (this._locTimer) clearTimeout(this._locTimer);
-        this.dbg("loc.ok", { lat: res.latitude, lng: res.longitude });
+        // 基础库可能返回字符串坐标，必须 Number() 转换，否则 toFixed 抛错导致 UI 不更新
+        const lat = Number(res.latitude), lng = Number(res.longitude);
+        this.dbg("loc.ok", { lat, lng });
         this.setData({
-          location: { lat: res.latitude, lng: res.longitude },
-          locationText: "北纬 " + res.latitude.toFixed(4) + "，东经 " + res.longitude.toFixed(4),
+          location: { lat, lng },
+          locationText: "北纬 " + lat.toFixed(4) + "，东经 " + lng.toFixed(4),
           locationFail: false,
           locState: "ok",
           locErr: "",
@@ -241,7 +243,8 @@ Page({
     if ("obeyMuteSwitch" in a) a.obeyMuteSwitch = false; // 绕过iOS静音拨片
     this.dbg("play.try", { path: c.p, native: c.n });
     const fs = my.getFileSystemManager && my.getFileSystemManager();
-    if (fs && fs.getFileInfo) {
+    // resource 网址不是文件系统路径，getFileInfo 会报"参数无效"，仅对 usr:// 本地路径做存在性诊断
+    if (fs && fs.getFileInfo && c.p.indexOf("http") !== 0) {
       fs.getFileInfo({ apFilePath: c.p, success: r => this.dbg("play.file", r), fail: e => this.dbg("play.filefail", e) });
     }
     a.onCanplay(() => { if (this.data.playing) { try { a.play(); } catch (e) { /* ignore */ } } });
