@@ -53,4 +53,12 @@
     第三步 · 提交上报
   </view>
   <view class="note">提交即表示同意：照片、位置、语音仅用于田间灾害信息记录。</view>
+
+  <view class="dbg-bar">
+    <view class="dbg-toggle" onTap="toggleDebug">{{showDebug ? '隐藏诊断日志' : '诊断日志'}}</view>
+    <view class="dbg-toggle ghost" a:if="{{showDebug}}" onTap="copyDebug">复制日志</view>
+  </view>
+  <scroll-view a:if="{{showDebug}}" class="dbg-panel" scroll-y="true">
+    <text class="dbg-text">{{debugText || '（暂无日志，操作拍照/录音/定位后产生）'}}</text>
+  </scroll-view>
 </view>
