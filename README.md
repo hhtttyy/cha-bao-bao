@@ -118,6 +118,35 @@ my.getLocation({ type: 0, success: res => {
 
 ---
 
+## 诊断日志控制台：设计与错误捕获
+
+**为什么需要**：体验版/线上版没有可远程拉取的 console 日志；真机日志只能靠 IDE 真机调试或 mPaaS。为在不连线时也能定根因，在上报页内置了端内诊断控制台。
+
+**结构**（`miniapp/pages/report/report.js` + `report.axml/acss`）：
+```js
+dbg(tag, val) {                      // 统一埋点：时间戳 + tag + JSON
+  const line = "[" + new Date().toLocaleTimeString() + "] " + tag + " " + JSON.stringify(val);
+  (this._dbg = this._dbg || []).push(line);   // 内存环形缓冲
+  console.log(line);                          // 有 IDE 时同样可见
+  if (this.data.showDebug) this.setData({ debugText: this._dbg.join("\n") });
+}
+```
+axml 底部「诊断日志」开关（`toggleDebug`）+「复制日志」（`copyDebug`→`my.setClipboard`）+ `scroll-view` 面板渲染 `debugText`。
+
+**捕获点**（成功/失败都埋点，不吞错误）：
+- 照片：`photo.raw`（chooseImage 原始路径）/ `photo.saved`（持久化后路径）
+- 录音：`rec.onStop`（原始 res：tempFilePath/duration/fileSize）/ `voice.saved`
+- 播放：`play.try{path,native}` → `play.file`/`play.filefail`（getFileInfo 存在性）→ `play.err`（`a.onError` 真实错误码，触发降级）→ `play.allfail`
+- 定位：`loc.sys`（getSystemSetting）/ `loc.auth`（getSetting.authSetting）/ `loc.ok` / `loc.fail`（真实 err）
+
+**错误捕获机制**：播放器 `onError` 与定位 `fail` 回调把原始错误对象记入日志并驱动降级/授权引导；因此能拿到「字符串坐标」「resource 路径」等关键事实，而非猜测。
+
+**读取方式**：展开面板**截图**最可靠；`my.setClipboard` 在部分基础库不生效（曾出现剪贴板为空），故以截图为主、复制为辅。
+
+**误报教训**：`getFileInfo` 对 `https://resource/` 网址必报"参数无效"（它只认本地 fs 路径），属诊断误报；已限制仅 `usr://` 路径才调用，避免干扰判断。
+
+---
+
 ## 目录结构
 
 ```
