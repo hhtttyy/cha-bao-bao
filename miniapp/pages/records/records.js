@@ -37,7 +37,10 @@ Page({
     try { a = native ? my.createInnerAudioContext({ useNativePlayer: true }) : my.createInnerAudioContext(); }
     catch (err) { a = my.createInnerAudioContext(); }
     a.volume = 1;
-    a.onCanplay(() => { if (this.data.playingId === id) { try { a.play(); } catch (err) { /* ignore */ } } });
+    // 支付宝事件名是 onCanPlay（大小写敏感），onCanplay 是微信写法
+    const onReady = () => { if (this.data.playingId === id) { try { a.play(); } catch (err) { /* ignore */ } } };
+    if (a.onCanPlay) a.onCanPlay(onReady);
+    else if (a.onCanplay) a.onCanplay(onReady);
     a.onEnded(() => this.setData({ playingId: "" }));
     a.onError(() => {
       if (native) { this.playWith(path, id, false); }
