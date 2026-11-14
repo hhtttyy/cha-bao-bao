@@ -32,8 +32,7 @@ Page({
     my.showToast({ content: "日志已复制，可粘贴反馈", duration: 2000 });
   },
 
-  // 持久化：优先 my.saveFile（返回 resource 沙盒路径，image/audio 均可读）；
-  // 仅当 saveFile 不可用才退到 fs.copyFile(usr://)。音频读不了 usr://，故不能本末倒置。
+  // 照片持久化：走 my.saveFile（本地缓存文件，image 组件可直接显示），沿用原有可用链路。
   persist(path, cb) {
     if (!path) { cb(""); return; }
     if (my.saveFile) {
@@ -52,6 +51,27 @@ Page({
       const dest = base + "/media_" + Date.now() + ext;
       fs.copyFile({ srcPath: path, destPath: dest, success: () => cb(dest), fail: () => cb(path) });
     } else cb(path);
+  },
+
+  // 录音持久化：支付宝官方录音示例使用 FileSystemManager.saveFile({ tempFilePath })。
+  // 不能沿用 my.saveFile / copyFile(usr://)：InnerAudioContext 仅保证播放网络地址与录音临时路径，
+  // my.saveFile 还可能移动临时文件，导致播放时本地路径全部失效（“文件已失效”）。
+  // 持久化失败时保留原始临时路径（本次启动内仍可播），避免换成不可播放的路径。
+  persistVoice(path, cb) {
+    if (!path) { cb(""); return; }
+    const fs = my.getFileSystemManager && my.getFileSystemManager();
+    if (fs && fs.saveFile) {
+      fs.saveFile({
+        tempFilePath: path,
+        success: r => cb((r && r.savedFilePath) || path),
+        fail: err => {
+          this.dbg("voice.persistFail", err);
+          cb(path);
+        }
+      });
+    } else {
+      cb(path);
+    }
   },
 
   // ---------- 第一步：现场拍照（仅相机，禁止相册选图 —— 现场性约束） ----------
@@ -87,38 +107,66 @@ Page({
     const sys = my.getSystemSetting ? my.getSystemSetting() : {};
     this.dbg("loc.sys", sys);
     if (sys.locationEnabled === false) {
-      this.setData({ locationFail: true, locState: "fail" });
+      this.setData({ locationFail: true, locState: "fail", locErr: "系统定位服务未开启" });
       my.showToast({ content: "请先在手机系统设置中开启定位服务", duration: 2500 });
       return;
     }
-    this.setData({ locationFail: false, locState: "locating" });
-    // 兜底：6 秒内没拿到定位就标记失败，不阻塞提交
+    this.setData({ location: null, locationText: "", locationFail: false, locState: "locating", locErr: "" });
+    // 兜底：8 秒内没拿到定位就标记失败，不阻塞提交
     this._locTimer = setTimeout(() => {
-      if (!this.data.location) this.setData({ locationFail: true, locState: "fail" });
-    }, 6000);
-    my.getLocation({
-      type: 0, // 只要经纬度，不做逆地理编码，返回更快
-      success: res => {
-        if (this._locTimer) clearTimeout(this._locTimer);
-        this.dbg("loc.ok", { lat: res.latitude, lng: res.longitude });
-        this.setData({
-          location: { lat: res.latitude, lng: res.longitude },
-          locationText: "北纬 " + res.latitude.toFixed(4) + "，东经 " + res.longitude.toFixed(4),
-          locationFail: false,
-          locState: "ok",
-          locErr: "",
-          canSubmit: !!this.data.imagePath
-        });
-      },
-      fail: err => {
-        if (this._locTimer) clearTimeout(this._locTimer);
-        this.handleLocFail(err);
+      this._locTimer = null;
+      if (this.data.locState === "locating") {
+        this.setData({ locationFail: true, locState: "fail", locErr: "定位超时" });
       }
-    });
+    }, 8000);
+    try {
+      my.getLocation({
+        type: 0, // 只要经纬度，不做逆地理编码，返回更快
+        cacheTimeout: 30,
+        success: res => this.handleLocSuccess(res),
+        fail: err => this.handleLocFail(err)
+      });
+    } catch (e) {
+      this.handleLocFail(e);
+    }
+  },
+
+  // 支付宝 my.getLocation 的 success 回调中 latitude/longitude 是 String（官方文档类型均为 String）。
+  // 旧代码直接 res.latitude.toFixed(4) 会抛 TypeError；且定时器已被提前清除，界面就永久停在“获取中”。
+  // 这里统一 Number 化并校验，任何异常都转失败态。
+  handleLocSuccess(res) {
+    try {
+      const rawLat = res && res.latitude;
+      const rawLng = res && res.longitude;
+      const hasVal = v => v !== null && v !== undefined && String(v).trim() !== "";
+      const lat = Number(rawLat);
+      const lng = Number(rawLng);
+      const valid = hasVal(rawLat) && hasVal(rawLng) &&
+        isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+      if (!valid) {
+        this.dbg("loc.invalid", { lat: rawLat, lng: rawLng });
+        this.handleLocFail({ error: "INVALID", errorMessage: "经纬度无效" });
+        return;
+      }
+      this.dbg("loc.ok", { lat, lng });
+      if (this._locTimer) { clearTimeout(this._locTimer); this._locTimer = null; }
+      this.setData({
+        location: { lat, lng },
+        locationText: "北纬 " + lat.toFixed(4) + "，东经 " + lng.toFixed(4),
+        locationFail: false,
+        locState: "ok",
+        locErr: "",
+        canSubmit: !!this.data.imagePath
+      });
+    } catch (e) {
+      this.dbg("loc.renderFail", String(e));
+      this.handleLocFail(e);
+    }
   },
 
   // 区分"用户拒绝授权"与"普通定位失败"，并记录真实错误便于排查（如类目准入限制）
   handleLocFail(err) {
+    if (this._locTimer) { clearTimeout(this._locTimer); this._locTimer = null; }
     this.dbg("loc.fail", err);
     const code = err && (err.error || err.errCode || err.code);
     const msg = (err && (err.errorMessage || err.errMsg)) || "";
@@ -160,7 +208,7 @@ Page({
       const tmp = res.apFilePath || res.tempFilePath || "";
       this._voiceTmp = tmp;
       this.dbg("rec.onStop", res);
-      this.persist(tmp, saved => {
+      this.persistVoice(tmp, saved => {
         this.dbg("voice.saved", saved);
         this.setData({ voicePath: saved, voiceSeconds: sec, canSubmit: !!this.data.imagePath });
       });
@@ -217,8 +265,9 @@ Page({
     }
     const cands = [];
     const push = (p, n) => { if (p && !cands.some(c => c.p === p && c.n === n)) cands.push({ p, n }); };
-    push(this.data.voicePath, true); push(this.data.voicePath, false);
+    // 录音临时路径是支付宝官方保证可播放的音频源；优先它，其次用持久化后的缓存路径
     push(this._voiceTmp, true); push(this._voiceTmp, false);
+    push(this.data.voicePath, true); push(this.data.voicePath, false);
     this._playQueue = cands; this._playIdx = 0;
     this.setData({ playing: true });
     this.playNext();
@@ -244,7 +293,10 @@ Page({
     if (fs && fs.getFileInfo) {
       fs.getFileInfo({ apFilePath: c.p, success: r => this.dbg("play.file", r), fail: e => this.dbg("play.filefail", e) });
     }
-    a.onCanplay(() => { if (this.data.playing) { try { a.play(); } catch (e) { /* ignore */ } } });
+    // 支付宝事件名是 onCanPlay（大小写敏感），onCanplay 是微信写法，注册了也不会触发
+    const onReady = () => { if (this.data.playing) { try { a.play(); } catch (e) { /* ignore */ } } };
+    if (a.onCanPlay) a.onCanPlay(onReady);
+    else if (a.onCanplay) a.onCanplay(onReady);
     a.onEnded(() => this.setData({ playing: false }));
     a.onError(err => { this.dbg("play.err", err); this.playNext(); });
     this.audio = a;
