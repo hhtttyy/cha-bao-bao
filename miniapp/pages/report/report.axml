@@ -1,0 +1,56 @@
+<view class="page">
+  <view class="steps-bar rise">
+    <view class="sb {{imagePath ? 'done' : ''}}">
+      <view class="sb-dot">{{imagePath ? '✓' : '1'}}</view><text class="sb-t">拍照</text>
+    </view>
+    <view class="sb-line {{imagePath ? 'done' : ''}}"></view>
+    <view class="sb {{voicePath ? 'done' : ''}}">
+      <view class="sb-dot">{{voicePath ? '✓' : '2'}}</view><text class="sb-t">说话</text>
+    </view>
+    <view class="sb-line {{voicePath ? 'done' : ''}}"></view>
+    <view class="sb {{canSubmit ? 'ready' : ''}}">
+      <view class="sb-dot">3</view><text class="sb-t">提交</text>
+    </view>
+  </view>
+
+  <view class="step-title">第一步 · 拍一张现场照片</view>
+  <view class="photo-box {{imagePath ? 'has' : ''}}" onTap="takePhoto">
+    <image a:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFill" class="photo" />
+    <view a:if="{{imagePath}}" class="photo-badge">✓ 已拍摄 · 点按重拍</view>
+    <view a:else class="photo-empty">
+      <view class="photo-icon">📸</view>
+      <view class="photo-hint">点这里拍一张（只能现场拍，不能从相册选）</view>
+    </view>
+  </view>
+  <view class="loc-card">
+    <view class="loc-head">
+      <text class="loc-title">📍 经纬度</text>
+      <text class="loc-state {{locState}}">{{locState === 'ok' ? '已获取' : (locState === 'locating' ? '获取中…' : (locState === 'denied' ? '未授权' : '未获取'))}}</text>
+    </view>
+    <view class="loc-value" a:if="{{locationText}}">{{locationText}}</view>
+    <view class="loc-tip" a:elif="{{locState === 'denied'}}">位置权限被拒绝。点「去设置开启」授权后重试；不开启也能提交。</view>
+    <view class="loc-tip" a:elif="{{locState === 'fail'}}">定位未成功{{locErr ? '（' + locErr + '）' : ''}}。可能因系统定位未开、或当前类目暂未开放位置接口。不影响提交。</view>
+    <view class="loc-tip" a:else>点按钮主动获取经纬度（会弹授权）。位置仅用于灾害记录，可不获取。</view>
+    <view class="loc-actions">
+      <view class="loc-btn" onTap="locate">{{locState === 'ok' ? '重新定位' : '获取经纬度'}}</view>
+      <view class="loc-btn ghost" a:if="{{locState === 'denied'}}" onTap="openLocSetting">去设置开启</view>
+    </view>
+  </view>
+
+  <view class="step-title">第二步 · 按住说话</view>
+  <view class="voice-wrap" onTouchStart="startRecord" onTouchEnd="stopRecord" onTouchCancel="stopRecord">
+    <view class="voice-btn {{recording ? 'recording' : ''}}">
+      <view a:if="{{recording}}" class="wave"><i></i><i></i><i></i><i></i><i></i><i></i></view>
+      {{recording ? '松开结束录音…' : (voicePath ? '🎤 已录好，再按住可重录' : '🎤 按住说话，讲讲受灾情况')}}
+    </view>
+  </view>
+  <view class="voice-bar {{playing ? 'on' : ''}}" a:if="{{voicePath}}" onTap="togglePlay">
+    <text class="play-icon">{{playing ? '⏸' : '▶'}}</text>
+    <text class="play-text">{{playing ? '正在播放…点按停止' : '播放刚才的录音'}}{{voiceSeconds ? '（' + voiceSeconds + '″）' : ''}}</text>
+  </view>
+
+  <view class="btn-disaster submit {{canSubmit ? '' : 'disabled'}}" onTap="submit">
+    第三步 · 提交上报
+  </view>
+  <view class="note">提交即表示同意：照片、位置、语音仅用于田间灾害信息记录。</view>
+</view>

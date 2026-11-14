@@ -1,0 +1,16 @@
+<view class="page">
+  <view class="ok-wrap {{ok ? 'ok' : 'save'}}">
+    <view class="ok-icon">{{ok ? '✓' : '📥'}}</view>
+  </view>
+  <view class="title">{{ok ? "灾情已记录" : "已暂存到手机"}}</view>
+  <view class="sub">{{ok ? "您的灾害记录已同步完成" : "当前网络不可用，记录已安全保存，联网后自动补传"}}</view>
+
+  <view class="demo-card rise-2">
+    <view class="demo-title">关于「茶保宝」</view>
+    <view class="demo-text">本小程序为 demo 级演示作品，用于服务茶农及时上报灾情：现场拍照、自动记录位置与时间、语音描述受灾情况。</view>
+    <view class="demo-text">演示版数据仅保存在您的手机中；正式版将对接县级查勘与农情服务平台，让灾害记录直连一线查勘与调度。</view>
+  </view>
+
+  <view class="btn-disaster rise-3" onTap="goRecords">查看我的记录</view>
+  <view class="btn-gold rise-3" onTap="goHome">返回首页</view>
+</view>

@@ -1,0 +1,56 @@
+.page { padding: 32rpx 28rpx 150rpx; }
+
+/* 品牌头部：茶绿渐变 + 光晕 */
+.hero {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  margin: 8rpx 0 36rpx;
+  padding: 48rpx 24rpx 40rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(160deg, #2f6b4f 0%, #245239 70%, #1f3d2e 100%);
+  overflow: hidden;
+  box-shadow: 0 14rpx 40rpx rgba(31, 61, 46, 0.28);
+}
+.hero-glow {
+  position: absolute; top: -120rpx; right: -80rpx;
+  width: 320rpx; height: 320rpx; border-radius: 50%;
+  background: radial-gradient(circle, rgba(230,180,85,.35), rgba(230,180,85,0) 70%);
+}
+.hero-logo { width: 128rpx; height: 128rpx; border-radius: 30rpx; box-shadow: 0 10rpx 30rpx rgba(0,0,0,.3); }
+.hero-name { font-size: 56rpx; font-weight: 800; color: #ffffff; margin-top: 20rpx; letter-spacing: 6rpx; }
+.hero-sub { font-size: 28rpx; color: #cfe6d8; margin-top: 10rpx; letter-spacing: 2rpx; }
+.hero-badge {
+  margin-top: 22rpx; font-size: 22rpx; color: #e6b455;
+  background: rgba(230,180,85,.16); border: 1rpx solid rgba(230,180,85,.4);
+  padding: 6rpx 22rpx; border-radius: 999rpx;
+}
+
+.alert {
+  background: #f7e6e0; border: 2rpx solid #c8503c; color: #8a3a28;
+  border-radius: 20rpx; padding: 22rpx 24rpx; font-size: 30rpx;
+  margin-bottom: 28rpx; display: flex; align-items: center;
+}
+.alert-icon { margin-right: 12rpx; }
+.alert-text { flex: 1; }
+.row { display: flex; gap: 20rpx; margin-top: 24rpx; }
+.half { flex: 1; text-align: center; }
+
+.guide { margin-top: 32rpx; }
+.guide-title { font-size: 32rpx; font-weight: 700; color: #1f3d2e; margin-bottom: 20rpx; }
+.guide-step { display: flex; align-items: center; padding: 22rpx 0; border-bottom: 1rpx solid #f0ece2; }
+.guide-step:last-child { border-bottom: none; }
+.guide-ico {
+  width: 76rpx; height: 76rpx; border-radius: 22rpx;
+  background: linear-gradient(135deg, #e4f0e8, #d3e8dc);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 38rpx; margin-right: 22rpx;
+}
+.guide-body { flex: 1; }
+.guide-h { font-size: 30rpx; font-weight: 700; color: #2f6b4f; }
+.guide-p { font-size: 26rpx; color: #8a9086; margin-top: 6rpx; }
+.guide-num { font-size: 48rpx; font-weight: 800; color: #e7e1d3; font-family: Georgia, serif; }
+
+.pending {
+  margin-top: 28rpx; background: #f6ecd8; color: #c08a2e;
+  border-radius: 16rpx; padding: 18rpx 22rpx; font-size: 26rpx; text-align: center;
+}

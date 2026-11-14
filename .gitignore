@@ -1,0 +1,12 @@
+# 依赖与构建产物
+node_modules/
+build/
+dist/.gate/
+*.zip
+*.b64
+.venv/
+# 系统/临时
+.DS_Store
+*.log
+# 生成素材原图（站点已内嵌 base64，无需入库）
+vibe_images/

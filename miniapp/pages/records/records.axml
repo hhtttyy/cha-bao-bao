@@ -1,0 +1,22 @@
+<view class="page">
+  <view a:if="{{reports.length === 0}}" class="empty rise">
+    <view class="empty-circle">📋</view>
+    <view class="empty-text">还没有上报记录</view>
+    <view class="empty-sub">受灾时在首页点"我要报灾"就行</view>
+  </view>
+
+  <view class="card rise" a:for="{{reports}}" a:key="clientReportId">
+    <view class="card-head">
+      <text class="time">{{item.capturedAtShort}}</text>
+      <text class="status {{item.status === '已同步' ? 'ok' : 'wait'}}">{{item.status}}</text>
+    </view>
+    <image src="{{item.imagePath}}" mode="aspectFill" class="thumb" data-path="{{item.imagePath}}" onTap="preview" />
+    <view class="meta">📍 {{item.locText}}</view>
+    <view class="voice-chip {{playingId === item.clientReportId ? 'on' : ''}}" a:if="{{item.hasVoice}}"
+          onTap="playVoice" data-path="{{item.voicePath}}" data-id="{{item.clientReportId}}">
+      {{playingId === item.clientReportId ? '⏸ 停止播放' : '▶ 播放语音'}}{{item.durationText}}
+    </view>
+  </view>
+
+  <tab-bar selected="{{1}}" />
+</view>

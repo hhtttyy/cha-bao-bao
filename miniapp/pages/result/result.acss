@@ -1,0 +1,24 @@
+.page { padding: 80rpx 40rpx 60rpx; text-align: center; }
+
+.ok-wrap {
+  width: 180rpx; height: 180rpx; margin: 0 auto;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  animation: pop .6s ease-out both;
+}
+.ok-wrap.ok { background: linear-gradient(135deg, #3a8a68, #2f6b4f); box-shadow: 0 16rpx 44rpx rgba(47,107,79,.35); }
+.ok-wrap.save { background: linear-gradient(135deg, #d19a3a, #c08a2e); box-shadow: 0 16rpx 44rpx rgba(192,138,46,.35); }
+.ok-icon { font-size: 92rpx; color: #ffffff; font-weight: 700; }
+
+.title { font-size: 44rpx; font-weight: 700; color: #1f3d2e; margin-top: 32rpx; }
+.sub { font-size: 28rpx; color: #3d6b52; margin-top: 14rpx; line-height: 1.6; }
+
+.demo-card {
+  margin: 48rpx 0; background: #ffffff; border: 1rpx solid #e7e1d3;
+  border-radius: 24rpx; padding: 30rpx 28rpx; text-align: left;
+  box-shadow: 0 6rpx 24rpx rgba(31,61,46,.06);
+}
+.demo-title { font-size: 30rpx; font-weight: 700; color: #c08a2e; margin-bottom: 14rpx; }
+.demo-text { font-size: 26rpx; color: #3d6b52; line-height: 1.7; margin-bottom: 10rpx; }
+
+.btn-gold { margin-top: 22rpx; }

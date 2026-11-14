@@ -1,0 +1,19 @@
+<view class="page">
+  <view a:if="{{items.length === 0}}" class="empty rise">
+    <view class="empty-circle">🗺️</view>
+    <view class="empty-text">周边暂时没有新的农情上报</view>
+    <view class="empty-sub">正式版将展示同村茶农的上报动态与霜冻预警</view>
+    <view class="btn-gold empty-cta" onTap="goReport">📷 我先去上报一条</view>
+  </view>
+
+  <view class="card rise" a:for="{{items}}" a:key="id">
+    <view class="item-head">
+      <text class="village">{{item.village}}</text>
+      <text class="level lv-{{item.level}}">{{item.levelText}}</text>
+    </view>
+    <view class="item-body">{{item.summary}}</view>
+    <view class="item-time">{{item.timeText}} · {{item.countText}}</view>
+  </view>
+
+  <tab-bar selected="{{2}}" />
+</view>

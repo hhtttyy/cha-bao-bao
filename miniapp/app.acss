@@ -1,0 +1,66 @@
+/* ============================================================
+   茶保宝 品牌设计系统 v2（与讲述站同源 · 唯一色板来源）
+   主色茶绿 #2f6b4f · 标题深绿 #1f3d2e · 正文绿 #3d6b52
+   破晓金 #c08a2e · 春茶绿 #3a8a68 · 警示赭 #c8503c
+   暖白底 #f7f4ec · 卡片 #ffffff · 描边 #e7e1d3 · 弱化 #8a9086
+   圆角：卡片/按钮 24rpx · 胶囊 999rpx
+   ============================================================ */
+page {
+  background: #f7f4ec;
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  color: #1f3d2e;
+}
+
+/* 主按钮：茶绿渐变 + 投影 + 按压回弹 */
+.btn-disaster {
+  background: linear-gradient(135deg, #3a8a68, #2f6b4f);
+  color: #ffffff;
+  border-radius: 24rpx;
+  padding: 34rpx 0;
+  text-align: center;
+  font-size: 40rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  box-shadow: 0 10rpx 26rpx rgba(47, 107, 79, 0.30);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+.btn-disaster:active { transform: scale(0.97); box-shadow: 0 4rpx 12rpx rgba(47, 107, 79, 0.25); }
+.btn-disaster.disabled { opacity: 0.4; box-shadow: none; }
+
+/* 次按钮：破晓金 */
+.btn-gold {
+  background: linear-gradient(135deg, #d19a3a, #c08a2e);
+  color: #ffffff;
+  border-radius: 24rpx;
+  padding: 26rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(192, 138, 46, 0.26);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn-gold:active { transform: scale(0.97); box-shadow: 0 3rpx 10rpx rgba(192, 138, 46, 0.22); }
+
+/* 卡片 */
+.card {
+  background: #ffffff;
+  border: 1rpx solid #e7e1d3;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 6rpx 24rpx rgba(31, 61, 46, 0.06);
+}
+
+/* 入场动效 */
+@keyframes rise { from { opacity: 0; transform: translateY(20rpx); } to { opacity: 1; transform: none; } }
+.rise { animation: rise 0.5s ease-out both; }
+.rise-1 { animation: rise 0.5s 0.05s ease-out both; }
+.rise-2 { animation: rise 0.5s 0.12s ease-out both; }
+.rise-3 { animation: rise 0.5s 0.2s ease-out both; }
+
+/* 录音脉冲 */
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(200,80,60,.35); } 50% { box-shadow: 0 0 0 16rpx rgba(200,80,60,0); } }
+/* 声波 */
+@keyframes wv { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+/* 成功勾弹出 */
+@keyframes pop { 0% { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }

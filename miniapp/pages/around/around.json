@@ -1,0 +1,4 @@
+{
+  "defaultTitle": "周边农情",
+  "usingComponents": { "tab-bar": "/components/tab-bar/index" }
+}

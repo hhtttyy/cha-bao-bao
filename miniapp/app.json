@@ -1,0 +1,25 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/report/report",
+    "pages/records/records",
+    "pages/around/around",
+    "pages/result/result"
+  ],
+  "window": {
+    "defaultTitle": "茶保宝",
+    "titleBarColor": "#2f6b4f",
+    "backgroundColor": "#f7f4ec"
+  },
+  "tabBar": {
+    "textColor": "#3d6b52",
+    "selectedColor": "#2f6b4f",
+    "backgroundColor": "#ffffff",
+    "items": [
+      { "pagePath": "pages/index/index", "name": "首页" },
+      { "pagePath": "pages/records/records", "name": "我的上报" },
+      { "pagePath": "pages/around/around", "name": "周边农情" }
+    ]
+  },
+  "style": "v2"
+}

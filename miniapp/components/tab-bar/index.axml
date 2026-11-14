@@ -1,0 +1,14 @@
+<view class="tabbar">
+  <view class="tab {{selected === 0 ? 'on' : ''}}" data-path="/pages/index/index" onTap="go">
+    <view class="tab-ico">🏠</view>
+    <view class="tab-t">首页</view>
+  </view>
+  <view class="tab {{selected === 1 ? 'on' : ''}}" data-path="/pages/records/records" onTap="go">
+    <view class="tab-ico">📋</view>
+    <view class="tab-t">我的上报</view>
+  </view>
+  <view class="tab {{selected === 2 ? 'on' : ''}}" data-path="/pages/around/around" onTap="go">
+    <view class="tab-ico">🗺️</view>
+    <view class="tab-t">周边农情</view>
+  </view>
+</view>

@@ -1,0 +1,55 @@
+<view class="page">
+  <view class="hero rise">
+    <view class="hero-glow"></view>
+    <image class="hero-logo" src="/assets/logo.png" mode="aspectFit"></image>
+    <view class="hero-name">茶保宝</view>
+    <view class="hero-sub">田间灾害，一拍即存</view>
+    <view class="hero-badge">演示版 · 数据仅存本机</view>
+  </view>
+
+  <view class="alert rise-1" a:if="{{alert}}">
+    <text class="alert-icon">❄️</text>
+    <text class="alert-text">{{alert}}</text>
+  </view>
+
+  <view class="btn-disaster rise-1" onTap="goReport">📷 我要报灾</view>
+
+  <view class="row rise-2">
+    <view class="half btn-gold" onTap="goAround">🗺️ 周边农情</view>
+    <view class="half btn-gold" onTap="goRecords">📋 我的上报</view>
+  </view>
+
+  <view class="card guide rise-3">
+    <view class="guide-title">报灾三步，一分钟搞定</view>
+    <view class="guide-step">
+      <view class="guide-ico">📷</view>
+      <view class="guide-body">
+        <view class="guide-h">拍一张</view>
+        <view class="guide-p">受灾茶芽实拍，自动带上经纬度</view>
+      </view>
+      <view class="guide-num">1</view>
+    </view>
+    <view class="guide-step">
+      <view class="guide-ico">🎙️</view>
+      <view class="guide-body">
+        <view class="guide-h">说一说</view>
+        <view class="guide-p">按住用方言讲受灾情况，不用打字</view>
+      </view>
+      <view class="guide-num">2</view>
+    </view>
+    <view class="guide-step">
+      <view class="guide-ico">✅</view>
+      <view class="guide-body">
+        <view class="guide-h">存下来</view>
+        <view class="guide-p">点提交，灾害记录就存好啦</view>
+      </view>
+      <view class="guide-num">3</view>
+    </view>
+  </view>
+
+  <view class="pending" a:if="{{pendingCount > 0}}">
+    您有 {{pendingCount}} 条上报待网络恢复后自动补传
+  </view>
+
+  <tab-bar selected="{{0}}" />
+</view>
